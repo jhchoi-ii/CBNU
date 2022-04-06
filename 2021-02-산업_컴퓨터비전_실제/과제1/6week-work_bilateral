@@ -1,0 +1,69 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+#
+sigmaColor = 0;
+sigmaSpace = 10;
+diameter = -1;
+
+image = cv2.imread('./lena.png').astype(np.float32) / 255
+
+#노이즈
+noised = (image + 0.2 * np.random.rand(*image.shape).astype(np.float32))
+
+noised = noised.clip(0, 1)
+plt.imshow(noised[:,:,[2,1,0]])
+plt.xlabel('Noise')
+plt.show()
+
+#bilateralFilter 적용
+#bilateralFilter: (src, diameter, sigmaColor, sigmaSpace, dst=..., borderType=...)
+
+#sigmaColor
+bilat = cv2.bilateralFilter(noised, diameter, sigmaColor + 0.1, sigmaSpace)
+plt.imshow(bilat[:, :, [2, 1, 0]])
+plt.xlabel('Diameter : {}, SigmaSpace : {}, SigmaColor : {}'.format(diameter, sigmaSpace, sigmaColor + 0.1))
+plt.show()
+
+bilat = cv2.bilateralFilter(noised, diameter, sigmaColor + 1, sigmaSpace)
+plt.imshow(bilat[:, :, [2, 1, 0]])
+plt.xlabel('Diameter : {}, SigmaSpace : {}, SigmaColor : {}'.format(diameter, sigmaSpace, sigmaColor + 1))
+plt.show()
+
+bilat = cv2.bilateralFilter(noised, diameter, sigmaColor + 10, sigmaSpace)
+plt.imshow(bilat[:, :, [2, 1, 0]])
+plt.xlabel('Diameter : {}, SigmaSpace : {}, SigmaColor : {}'.format(diameter, sigmaSpace, sigmaColor + 10))
+plt.show()
+
+#sigmaSpace
+bilat = cv2.bilateralFilter(noised, diameter, sigmaColor, sigmaSpace + 10)
+plt.imshow(bilat[:, :, [2, 1, 0]])
+plt.xlabel('Diameter : {}, SigmaSpace : {}, SigmaColor : {}'.format(diameter, sigmaSpace + 10, sigmaColor))
+plt.show()
+
+bilat = cv2.bilateralFilter(noised, diameter, sigmaColor, sigmaSpace + 30)
+plt.imshow(bilat[:, :, [2, 1, 0]])
+plt.xlabel('Diameter : {}, SigmaSpace : {}, SigmaColor : {}'.format(diameter, sigmaSpace + 30, sigmaColor))
+plt.show()
+
+bilat = cv2.bilateralFilter(noised, diameter, sigmaColor, sigmaSpace + 50)
+plt.imshow(bilat[:, :, [2, 1, 0]])
+plt.xlabel('Diameter : {}, SigmaSpace : {}, SigmaColor : {}'.format(diameter, sigmaSpace + 50, sigmaColor))
+plt.show()
+
+#diameter
+bilat = cv2.bilateralFilter(noised, diameter + 50, sigmaColor, sigmaSpace)
+plt.imshow(bilat[:, :, [2, 1, 0]])
+plt.xlabel('Diameter : {}, SigmaSpace : {}, SigmaColor : {}'.format(diameter + 50, sigmaSpace, sigmaColor))
+plt.show()
+
+bilat = cv2.bilateralFilter(noised, diameter - 0, sigmaColor, sigmaSpace)
+plt.imshow(bilat[:, :, [2, 1, 0]])
+plt.xlabel('Diameter : {}, SigmaSpace : {}, SigmaColor : {}'.format(diameter - 0, sigmaSpace, sigmaColor))
+plt.show()
+
+bilat = cv2.bilateralFilter(noised, diameter - 50, sigmaColor, sigmaSpace)
+plt.imshow(bilat[:, :, [2, 1, 0]])
+plt.xlabel('Diameter : {}, SigmaSpace : {}, SigmaColor : {}'.format(diameter - 50, sigmaSpace, sigmaColor))
+plt.show()

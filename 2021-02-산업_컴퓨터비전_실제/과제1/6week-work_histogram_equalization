@@ -1,0 +1,34 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+#R = 0, G = 1, B = 2
+input = 2;
+
+img = cv2.imread('./lena.png')
+
+#원본 히스토그램
+channels = cv2.split(img)
+colors = ('b', 'g', 'r')
+for (ch, color) in zip (channels, colors):
+    hist = cv2.calcHist([ch], [0], None, [256], [0, 256])
+    plt.plot(hist, color = color)
+plt.show()
+cv2.imshow("original color", img)
+cv2.waitKey()
+
+#평탄화 영상
+rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+rgb[:, :, input] = cv2.equalizeHist(rgb[:, :, input])
+color_eq = cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB)
+
+#평탄화 후 히스토그램
+channels = cv2.split(color_eq)
+colors = ('b', 'g', 'r')
+for (ch, color) in zip (channels, colors):
+    hist2 = cv2.calcHist([ch], [0], None, [256], [0, 256])
+    plt.plot(hist2, color = color)
+plt.show()
+cv2.imshow("equalized color", color_eq)
+cv2.waitKey()
+
