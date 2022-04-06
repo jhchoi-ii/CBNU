@@ -1,0 +1,103 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+def sift(img0, img1):
+    #img0 = cv2.imread('lena.png', cv2.IMREAD_COLOR)
+    #img1 = cv2.imread('lena.png', cv2.IMREAD_COLOR)
+    img1 = cv2.resize(img1, None, fx=0.75, fy=0.75)
+    img1 = np.pad(img1, ((700,)*2, (653,)*2, (0,)*2), 'constant', constant_values=0)
+    #img1 = np.pad(img1, ((600,)*2, (500,)*2, (0,)*2), 'constant', constant_values=0)
+    imgs_list = [img0, img1]
+
+    detector = cv2.xfeatures2d.SIFT_create(50)
+
+    for i in range(len(imgs_list)):
+        keypoints, descriptors = detector.detectAndCompute(imgs_list[i], None)
+
+        imgs_list[i] = cv2.drawKeypoints(imgs_list[i], keypoints, None, (0, 255, 0), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+    cv2.imshow("SIFT keypoints", np.hstack(imgs_list))
+    cv2.waitKey()
+
+    cv2.destroyAllWindows()
+
+def surf(img):
+    surf = cv2.xfeatures2d.SURF_create(10000);
+    surf.setExtended(True)
+    surf.setNOctaves(3)
+    surf.setNOctaveLayers(10)
+    surf.setUpright(False)
+
+    keyPoints, descriptors = surf.detectAndCompute(img, None)
+
+    show_img = cv2.drawKeypoints(img, keyPoints, None, (255, 0, 0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+    cv2.imshow("SURF descriptors", show_img)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+
+def orb(img):
+    orb =  cv2.ORB_create()
+    orb.setMaxFeatures(200)
+
+    keyPoints = orb.detect(img, None)
+    keyPoints, descrptors = orb.compute(img, keyPoints)
+
+    show_img = cv2.drawKeypoints(img, keyPoints, None, (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+    cv2.imshow("ORB descriptors", show_img)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+
+def ransac(img0, img1):
+    detector = cv2.ORB_create(100)
+    kps0, fea0 = detector.detectAndCompute(img0, None)
+    kps1, fea1 = detector.detectAndCompute(img1, None)
+    matcher = cv2.BFMatcher_create(cv2.NORM_HAMMING, False)
+    matches = matcher.match(fea0, fea1)
+
+    pts0 = np.float32([kps0[m.queryIdx].pt for m in matches]).reshape(-1, 2)
+    pts1 = np.float32([kps1[m.queryIdx].pt for m in matches]).reshape(-1, 2)
+    H, mask = cv2.findHomography(pts0, pts1, cv2.RANSAC, 3.0)
+
+    plt.figure()
+    plt.subplot(211)
+    plt.axis('off')
+    plt.title('all matches')
+    dbg_img = cv2.drawMatches(img0, kps0, img1, kps1, matches, None)
+    plt.imshow(dbg_img[:,:, [2,1,0]])
+    plt.subplot(212)
+    plt.axis('off')
+    plt.title('filtered matches')
+    dbg_img = cv2.drawMatches(img0, kps0, img1, kps1, [m for i, m in enumerate(matches) if mask[i]], None)
+    plt.imshow(dbg_img[:, :, [2, 1, 0]])
+    plt.tight_layout()
+    plt.show()
+
+def warping(img):
+    #img = cv2.imread("s1.jpg", cv2.IMREAD_COLOR)
+    height, width, channel = img.shape
+
+    srcPoint = np.array([[300, 200], [400, 200], [500, 500], [200, 500]], dtype=np.float32)
+    dstPoint = np.array([[0, 0], [width, 0], [width, height], [0, height]], dtype=np.float32)
+
+    matrix = cv2.getPerspectiveTransform(srcPoint, dstPoint)
+    dst = cv2.warpPerspective(img, matrix, (width, height))
+
+    cv2.imshow("dst", dst)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+
+#img0 = cv2.imread('s1.jpg', cv2.IMREAD_GRAYSCALE)
+#img1 = cv2.imread('s2.jpg', cv2.IMREAD_GRAYSCALE)
+img0 = cv2.imread('s1.jpg', cv2.IMREAD_COLOR)
+img1 = cv2.imread('s2.jpg', cv2.IMREAD_COLOR)
+
+#sift(img0, img1)
+surf(img0)
+surf(img1)
+orb(img0)
+orb(img1)
+ransac(img0, img1)
+warping(img0)
